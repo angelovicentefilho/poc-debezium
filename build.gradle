@@ -1,0 +1,70 @@
+plugins {
+    id 'eclipse'
+    id 'maven-publish'
+    id 'jacoco'
+
+	id 'java'
+	id 'org.springframework.boot' version '3.0.7'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'br.com.sansys.services'
+version = APP_VERSION
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	maven { url "https://nexus.jtech.com.br/repository/maven-public" }
+	mavenCentral()
+}
+
+dependencies {
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4"
+	compileOnly "org.projectlombok:lombok"
+	annotationProcessor "org.projectlombok:lombok"
+	implementation "org.springframework.boot:spring-boot-starter-web"
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.flywaydb:flyway-core:9.16.1'
+    implementation 'org.postgresql:postgresql:42.5.4'
+    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = group
+            artifactId = rootProject.name
+            version = version
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            name 'nexus'
+            url = 'https://nexus.jtech.com.br/repository/maven-' + (version.endsWith('SNAPSHOT') ? 'snapshots/' : 'releases/')
+            credentials {
+                username System.getenv("MAVEN_REPO_USER")
+                password System.getenv("MAVEN_REPO_PASS")
+            }
+        }
+    }
+}
